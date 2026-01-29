@@ -16,19 +16,18 @@ The system follows a **“Thin Client, Fat Server”** model:
 - **Server:** State management, synchronization, and conflict resolution
 
 ```mermaid
+graph TD
+      ClientA["Client A (Browser)"] --> Server["Node.js Server"]
+      ClientB["Client B (Browser)"] --> Server
 
-    ClientA["Client A (Browser)"] --> Server["Node.js Server"]
-    ClientB["Client B (Browser)"] --> Server
+      subgraph ServerLogic["Server Logic"]
+          Server --> History["Global History Stack"]
+          Server --> Redo["Redo Stack"]
+          Server --> Updates["State Updates"]
+      end
 
-    subgraph ServerLogic["Server Logic"]
-        Server --> History["Global History Stack"]
-        Server --> Redo["Redo Stack"]
-        Server --> Updates["State Updates"]
-    end
-
-    Updates --> ClientA
-    Updates --> ClientB
-
+      Updates --> ClientA
+      Updates --> ClientB
 ```
 
 ---
