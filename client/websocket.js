@@ -1,7 +1,15 @@
-// 1. Ask for Name immediately
-const username = prompt("Enter your name:") || "Guest";
+// 1. Username Logic (with LocalStorage)
+let storedName = localStorage.getItem('collaborative_username');
 
-//Getting the status bar element
+if (!storedName) {
+    storedName = prompt("Enter your name:") || "Guest";
+    // Save it for next time
+    localStorage.setItem('collaborative_username', storedName);
+}
+
+const username = storedName;
+
+// Getting the status bar element
 const statusEl = document.getElementById('status-bar');
 
 const socket = io();
@@ -12,33 +20,34 @@ const cursors = {};
 
 socket.on('connect', () => {
     console.log("✅ Connected.");
-    // Tell server our name
     socket.emit('new-user', username);
-    // Change statusEl background to 'green' and text to 'Online'
-    statusEl.style.background = 'green';
-    statusEl.innerText = 'Online';
+    
+    // UI Feedback
+    if(statusEl) {
+        statusEl.style.background = '#4CAF50'; // Green
+        statusEl.innerText = 'Online';
+        statusEl.style.color = 'white';
+    }
 });
 
 /* --- CURSOR LOGIC --- */
 socket.on('cursor-move', (data) => {
     const { id, x, y, name, color } = data;
 
-    // Create cursor if it doesn't exist
     if (!cursors[id]) {
         const cursor = document.createElement('div');
         cursor.className = 'cursor';
-        cursor.style.backgroundColor = color; // Use server-assigned color
+        cursor.style.backgroundColor = color;
         
         const label = document.createElement('div');
         label.className = 'cursor-label';
-        label.innerText = name; // Show REAL name
+        label.innerText = name;
         cursor.appendChild(label);
 
         cursorLayer.appendChild(cursor);
         cursors[id] = cursor;
     }
 
-    // Move cursor
     const el = cursors[id];
     el.style.left = x + 'px';
     el.style.top = y + 'px';
@@ -53,7 +62,8 @@ socket.on('user-disconnected', (id) => {
 
 /* --- DRAWING SYNC LOGIC --- */
 socket.on('drawing-live', (data) => {
-    drawLine(data);
+    // Check if drawLine exists (it's in canvas.js)
+    if (typeof drawLine === 'function') drawLine(data);
 });
 
 socket.on('history-update', (history) => {
@@ -70,16 +80,22 @@ socket.on('initial-history', (history) => {
     }
 });
 
+/* --- CONNECTION HANDLING (NO ALERTS!) --- */
+
 // Detect when we lose connection
 socket.on('disconnect', () => {
-    // Change statusEl background to 'red' and text to 'Reconnecting...'
-    statusEl.style.background = 'red';
-    statusEl.innerText = 'Reconnecting...';
+    if(statusEl) {
+        statusEl.style.background = '#f44336'; // Red
+        statusEl.innerText = 'Reconnecting...';
+    }
 });
 
-// Handle a connection error (The 'Error Handling' part!)
+// Handle connection error silently in the UI
 socket.on('connect_error', (err) => {
-    console.error("Connection failed:", err);
-    // Alert the user or log a helpful message
-    alert("Connection error! Please check your network and try refreshing the page.");
+    console.warn("Connection failed, retrying...", err);
+    // DO NOT USE ALERT HERE. It freezes the browser loop.
+    if(statusEl) {
+        statusEl.style.background = '#f44336'; // Red
+        statusEl.innerText = 'Connection Issues...';
+    }
 });
