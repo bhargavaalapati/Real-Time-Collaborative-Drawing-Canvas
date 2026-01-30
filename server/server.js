@@ -58,16 +58,32 @@ io.on("connection", (socket) => {
 
     // 4. Drawing - Save (Mouse Up)
     socket.on("drawing-save", (finishedStroke) => {
+        // [IMPROVEMENT] Attach User ID so we know who drew this
+        finishedStroke.userId = socket.id;
+
         drawingHistory.push(finishedStroke);
         redoStack = []; // Clear redo stack on new action
         // No broadcast needed here, users already saw live drawing
     });
 
-    // 5. UNDO
+    // 5. UNDO (USER-SPECIFIC)
     socket.on('undo', () => {
-        if (drawingHistory.length > 0) {
-            const lastStroke = drawingHistory.pop();
-            redoStack.push(lastStroke);
+        let indexToRemove = -1;
+
+        // Iterate backwards to find the last stroke by THIS user
+        for (let i = drawingHistory.length - 1; i >= 0; i--) {
+            if (drawingHistory[i].userId === socket.id) {
+                indexToRemove = i;
+                break;
+            }
+        }
+
+        if (indexToRemove !== -1) {
+            // Remove that specific stroke
+            const removedStroke = drawingHistory.splice(indexToRemove, 1)[0];
+            redoStack.push(removedStroke);
+            
+            // Broadcast the NEW history to everyone
             io.emit('history-update', drawingHistory);
         }
     });

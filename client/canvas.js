@@ -51,7 +51,7 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-/* ================= THE NEW LOGIC ================= */
+/* ================= THE DRAWING LOGIC ================= */
 
 let isDrawing = false;
 let currentStroke = []; // Stores the path we are currently drawing
@@ -83,7 +83,6 @@ canvas.addEventListener('mousemove', (e) => {
     drawLine(liveDrawData);
 
     // 3. Send "Live" update to others (So they see you drawing)
-    // NOTE: This does NOT go into history yet!
     if (typeof socket !== 'undefined') {
         socket.emit('drawing-live', liveDrawData);
     }
@@ -91,11 +90,8 @@ canvas.addEventListener('mousemove', (e) => {
     // 4. Save point to our current buffer
     currentStroke.push({ x: e.clientX, y: e.clientY });
 
-    // UPDATE THIS PART:
+    // 5. Broadcast Cursor Position (even while drawing)
     if (typeof socket !== 'undefined') {
-        // We aren't drawing, just moving the mouse
-        // We don't need to send name every millisecond (wasteful), 
-        // but for simplicity in this assignment, we rely on the server's stored state.
         socket.emit('cursor-move', { x: e.clientX, y: e.clientY });
     }
 });
@@ -121,16 +117,59 @@ canvas.addEventListener('mouseup', () => {
     }
 });
 
-// Undo / Clear Buttons
+// Undo / Clear / Redo Buttons
 document.getElementById('undoBtn').addEventListener('click', () => {
     socket.emit('undo');
 });
 document.getElementById('clearBtn').addEventListener('click', () => {
     socket.emit('clear');
 });
-// REDO BUTTON
 document.getElementById('redoBtn').addEventListener('click', () => {
     if (typeof socket !== 'undefined') {
         socket.emit('redo');
     }
+});
+
+/* ================= MOBILE TOUCH SUPPORT ================= */
+
+// Helper: Get exact touch position relative to the canvas
+function getTouchPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+    };
+}
+
+// 1. Touch Start -> Triggers Mouse Down
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Stop page scrolling
+    if (e.touches.length > 0) {
+        const pos = getTouchPos(e);
+        const mouseEvent = new MouseEvent("mousedown", {
+            clientX: pos.x,
+            clientY: pos.y
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }
+}, { passive: false });
+
+// 2. Touch Move -> Triggers Mouse Move
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Stop page scrolling
+    if (e.touches.length > 0) {
+        const pos = getTouchPos(e);
+        const mouseEvent = new MouseEvent("mousemove", {
+            clientX: pos.x,
+            clientY: pos.y
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }
+}, { passive: false });
+
+// 3. Touch End -> Triggers Mouse Up
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const mouseEvent = new MouseEvent("mouseup", {});
+    canvas.dispatchEvent(mouseEvent);
 });

@@ -77,3 +77,54 @@ canvas {
     z-index: 100;
     transition: background-color 0.3s;
 }
+
+#undoBtn {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+#undoBtn:hover {
+    background-color: #d5d5d5;
+}
+
+#redoBtn {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+#redoBtn:hover {
+    background-color: #d5d5d5;
+}
+
+#clearBtn {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+#clearBtn:hover {
+    background-color: #d5d5d5;
+}
+
+#colorPicker {
+    width: 40px;
+    height: 40px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 5px;
+}
