@@ -48,7 +48,7 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-/* ================= DRAWING LOGIC ================= */
+// DRAWING LOGIC
 
 let isDrawing = false;
 let currentStroke = [];
@@ -97,7 +97,7 @@ canvas.addEventListener('mouseup', () => {
 
     // Create the full Stroke Object with a Unique ID
     const finishedStroke = {
-        id: generateId(), // <--- NEW: Client generates ID
+        id: generateId(), // Client generates ID
         color: colorPicker.value,
         size: brushSize.value,
         points: currentStroke
@@ -112,17 +112,12 @@ canvas.addEventListener('mouseup', () => {
     }
 });
 
-/* ================= OPTIMISTIC UNDO ================= */
+// OPTIMISTIC UNDO
 
 document.getElementById('undoBtn').addEventListener('click', () => {
     if (typeof socket === 'undefined') return;
 
-    // 1. Find my last stroke (Optimistic)
-    // We scan backwards for the last stroke that doesn't have a 'foreign' flag
-    // (In a real app, we check userId, but here we assume local push = mine for the moment)
-    // A safer way is to let the server handle ID matching, 
-    // BUT for "Optimistic," we simply tell the server "Undo" and wait for the delta.
-    
+    // 1. Find my last stroke (Optimistic) -  We scan backwards for the last stroke that doesn't have a 'foreign' flag - A safer way is to let the server handle ID matching, - BUT for "Optimistic," we simply tell the server "Undo" and wait for the delta. 
     // For pure Delta speed without complexity, we send the command.
     socket.emit('undo');
 });
@@ -136,7 +131,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 });
 
 
-/* ================= MOBILE TOUCH ================= */
+// MOBILE TOUCH
 function getTouchPos(e) {
     const rect = canvas.getBoundingClientRect();
     return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };

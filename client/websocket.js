@@ -1,4 +1,3 @@
-/* ===================== websocket.js ===================== */
 let storedName = sessionStorage.getItem('collaborative_username');
 if (!storedName) {
     storedName = prompt("Enter your name:") || "Guest";
@@ -19,7 +18,7 @@ socket.on('connect', () => {
     }
 });
 
-/* --- CURSOR LOGIC --- */
+// CURSOR LOGIC
 socket.on('cursor-move', (data) => {
     const { id, x, y, name, color } = data;
     if (!cursors[id]) {
@@ -45,7 +44,7 @@ socket.on('user-disconnected', (id) => {
     }
 });
 
-/* --- DRAWING SYNC LOGIC (OPTIMIZED) --- */
+// DRAWING SYNC LOGIC (OPTIMIZED)
 
 socket.on('drawing-live', (data) => {
     // Only visualize the temporary movement
@@ -69,10 +68,7 @@ socket.on('initial-history', (history) => {
 // 2. New Stroke (Delta Update) - someone else finished a line
 socket.on('new-stroke', (stroke) => {
     window.localHistory.push(stroke);
-    // Optimization: Just draw this one stroke instead of clearing everything
-    // But to be safe with z-index ordering, we usually redraw, 
-    // or just draw this one on top.
-    // Ideally: just draw it.
+    // ** Optimization: Just draw this one stroke instead of clearing everything. But to be safe with z-index ordering, we usually redraw, or just draw this one on top. Ideally: just draw it. **//
     if (stroke.points && stroke.points.length > 0) {
         const ctx = document.getElementById('drawingCanvas').getContext('2d');
         ctx.beginPath();
@@ -101,7 +97,7 @@ socket.on('clear-canvas', () => {
     if (typeof window.redrawCanvas === 'function') window.redrawCanvas();
 });
 
-/* --- CONNECTION HANDLING --- */
+// CONNECTION HANDLING
 socket.on('disconnect', () => {
     if(statusEl) {
         statusEl.style.background = '#f44336';

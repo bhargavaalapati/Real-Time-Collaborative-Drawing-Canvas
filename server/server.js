@@ -9,7 +9,7 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, "../client")));
 
-// --- STATE MANAGEMENT ---
+// STATE MANAGEMENT
 let drawingHistory = [];
 let redoStack = []; 
 let users = {}; 
@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
         socket.broadcast.emit('new-stroke', finishedStroke);
     });
 
-    // --- OPTIMIZED UNDO ---
+    // OPTIMIZED UNDO
     socket.on('undo', () => {
         let indexToRemove = -1;
         // Find last stroke by this user
@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    // --- OPTIMIZED REDO ---
+    // OPTIMIZED REDO
     socket.on('redo', () => {
         if (redoStack.length > 0) {
             const strokeToRestore = redoStack.pop();
